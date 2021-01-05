@@ -1,35 +1,24 @@
 package com.wego.hrpayroll.services;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.wego.hrpayroll.entities.Payment;
 import com.wego.hrpayroll.entities.Worker;
+import com.wego.hrpayroll.feignclients.WoerkerFeignClient;
 
 @Service
 public class PaymentService {
 	
 	
-	@Value("${hr-worker.host}")
-	private String workHost;
-	
 	@Autowired
-	private RestTemplate restTemplate;
+	private WoerkerFeignClient workerFeignClient;
 	
 	public Payment getPayment(long workerId, int days)
 	{
 		
-		Map<String, String> uriVariables = new HashMap<>();
-		
-		uriVariables.put("id", Long.toString(workerId));
-		
-		Worker worker = restTemplate.getForObject(workHost + "/workers/{id}", Worker.class, uriVariables);
+	    Worker worker = workerFeignClient.findById(workerId).getBody();
 		
 		return new Payment(worker.getName(), worker.getDailyIncome(), days);
 	}
